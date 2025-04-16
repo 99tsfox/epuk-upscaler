@@ -1,8 +1,15 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 from io import StringIO
+from PIL import Image
+
+# ---- Load logo ----
+logo = Image.open("Forest Surveys Logo M.png")
+
+# ---- Display branding ----
+st.image(logo, width=120)
+st.markdown("<h1 style='text-align: center; color: forestgreen;'>Forest Surveys</h1>", unsafe_allow_html=True)
 
 st.title("🌲 EPUK Plot Upscaler Tool")
 
@@ -63,12 +70,18 @@ if uploaded_file and input_area > 0 and output_area > input_area:
 
     # Combine all output lines
     header = lines[0] + "\n"
-    plot_lines = [",".join(row) + "\n" for row in plot_data]
+    # Update plot size in the 'P' lines
+updated_plot_lines = []
+for row in plot_data:
+    if row[0] == "P":
+        row[4] = f"{output_area:.4f}"  # set plot size to new output area
+    updated_plot_lines.append(",".join(row) + "\n")
+    
     original_tree_lines = tree_df.apply(
         lambda row: f"M,{row['PlotID']},{row['Species']},{int(row['DBH_mm'])},{int(row['Height_m'])}\n", axis=1
     ).tolist()
 
-    all_lines = header + "".join(plot_lines + original_tree_lines + simulated_tree_entries)
+all_lines = header + "".join(updated_plot_lines + original_tree_lines + simulated_tree_entries)
     st.download_button(
         label="📁 Download Adjusted .EPUK File",
         data=all_lines,
