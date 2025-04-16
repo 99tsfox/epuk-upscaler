@@ -7,7 +7,6 @@ from PIL import Image
 # --- Load and display logo ---
 logo = Image.open('Forest Surveys Logo M.png')
 st.image(logo, width=120)
-st.markdown("<h1 style='text-align: center; color: forestgreen;'>Forest Surveys</h1>", unsafe_allow_html=True)
 
 st.title("EPUK Plot Upscaler Tool")
 
