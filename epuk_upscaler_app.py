@@ -4,17 +4,18 @@ import numpy as np
 from io import StringIO
 from PIL import Image
 
-# ---- Load logo ----
+# --- Load and display logo ---
 logo = Image.open("Forest Surveys Logo M.png")
-
-# ---- Display branding ----
 st.image(logo, width=120)
 st.markdown("<h1 style='text-align: center; color: forestgreen;'>Forest Surveys</h1>", unsafe_allow_html=True)
 
 st.title("🌲 EPUK Plot Upscaler Tool")
 
+# Upload file
 uploaded_file = st.file_uploader("Upload a .EPUK file", type=["EPUK"])
-input_area = st.number_input("Input plot size (ha)", value=0.0302, format="%.4f")
+
+# Plot size inputs
+input_area = st.number_input("Original plot size (ha)", value=0.0302, format="%.4f")
 output_area = st.number_input("Desired plot size (ha)", value=0.05, format="%.4f")
 
 if uploaded_file and input_area > 0 and output_area > input_area:
@@ -68,23 +69,26 @@ if uploaded_file and input_area > 0 and output_area > input_area:
                     line = f"M,{plot_id},{species},{int(round(dbh))},{int(round(ht))}\n"
                     simulated_tree_entries.append(line)
 
-    # Combine all output lines
-    header = lines[0] + "\n"
-    # Update plot size in the 'P' lines
-updated_plot_lines = []
-for row in plot_data:
-    if row[0] == "P":
-        row[4] = f"{output_area:.4f}"  # set plot size to new output area
-    updated_plot_lines.append(",".join(row) + "\n")
-    
+    # Update plot size in the P lines
+    updated_plot_lines = []
+    for row in plot_data:
+        if row[0] == "P":
+            row[4] = f"{output_area:.4f}"
+        updated_plot_lines.append(",".join(row) + "\n")
+
+    # Convert original tree lines
     original_tree_lines = tree_df.apply(
         lambda row: f"M,{row['PlotID']},{row['Species']},{int(row['DBH_mm'])},{int(row['Height_m'])}\n", axis=1
     ).tolist()
 
-all_lines = header + "".join(updated_plot_lines + original_tree_lines + simulated_tree_entries)
+    # Assemble full output
+    header = lines[0] + "\n"
+    all_lines = header + "".join(updated_plot_lines + original_tree_lines + simulated_tree_entries)
+
+    # Download button
     st.download_button(
         label="📁 Download Adjusted .EPUK File",
         data=all_lines,
-        file_name="EPUK_Extrapolated_0.05ha.EPUK",
+        file_name="EPUK_Extrapolated_Updated.EPUK",
         mime="text/plain"
     )
