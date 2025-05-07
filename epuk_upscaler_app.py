@@ -77,4 +77,7 @@ if uploaded_file is not None and input_area > 0 and output_area > input_area:
 
         # Update plot size in the P lines
         updated_plot_lines = []
-        for
+        for row in plot_data:
+    if row[0] == "P":
+        row[4] = f"{output_area:.4f}"
+    updated_plot_lines.append(",".join(row) + "\n")
