@@ -14,8 +14,8 @@ st.image(logo, width=120)
 
 st.title("EPUK Plot Upscaler Tool")
 
-# --- File uploader with new key to avoid session state errors ---
-uploaded_file = st.file_uploader("Upload your EPUK data", type=["EPUK"], key="new_epuk_upload")
+# --- File uploader with a NEW key ---
+uploaded_file = st.file_uploader("Upload your EPUK data", type=["EPUK"], key="epuk_upload_v2")
 
 # --- Plot size inputs ---
 input_area = st.number_input("Original plot size (ha)", value=0.0302, format="%.4f")
