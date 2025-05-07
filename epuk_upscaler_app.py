@@ -10,15 +10,17 @@ st.image(logo, width=120)
 
 st.title("EPUK Plot Upscaler Tool")
 
-# Upload file
+# --- File uploader ---
 uploaded_file = st.file_uploader("Upload a .EPUK file", type=["EPUK"])
 
-# Plot size inputs
+# --- Plot size inputs ---
 input_area = st.number_input("Original plot size (ha)", value=0.0302, format="%.4f")
 output_area = st.number_input("Desired plot size (ha)", value=0.05, format="%.4f")
 
-if uploaded_file and input_area > 0 and output_area > input_area:
-    lines = uploaded_file.getvalue().decode("utf-8").splitlines()
+# --- File content processing ---
+if uploaded_file is not None and input_area > 0 and output_area > input_area:
+    file_contents = uploaded_file.read().decode("utf-8")
+    lines = file_contents.splitlines()
 
     plot_data = []
     tree_data = []
