@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+st.session_state.clear()
 from io import StringIO
 from PIL import Image
 
