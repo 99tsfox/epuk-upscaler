@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from io import StringIO
 from PIL import Image
 
-# --- Clear any broken uploaded_file state (safely) ---
-if "uploaded_file" in st.session_state:
-    del st.session_state["uploaded_file"]
+# --- Optional: Add a reset button to clear broken state ---
+if st.button("🔁 Force Reset App State"):
+    st.session_state.clear()
+    st.experimental_rerun()
 
 # --- Load and display logo ---
 logo = Image.open('Forest Surveys Logo M.png')
@@ -14,14 +14,14 @@ st.image(logo, width=120)
 
 st.title("EPUK Plot Upscaler Tool")
 
-# --- File uploader ---
+# --- File uploader with new key to avoid session state errors ---
 uploaded_file = st.file_uploader("Upload your EPUK data", type=["EPUK"], key="new_epuk_upload")
 
 # --- Plot size inputs ---
 input_area = st.number_input("Original plot size (ha)", value=0.0302, format="%.4f")
 output_area = st.number_input("Desired plot size (ha)", value=0.05, format="%.4f")
 
-# --- File content processing ---
+# --- Main processing logic ---
 if uploaded_file is not None and input_area > 0 and output_area > input_area:
     try:
         file_contents = uploaded_file.read().decode("utf-8")
@@ -80,4 +80,26 @@ if uploaded_file is not None and input_area > 0 and output_area > input_area:
         for row in plot_data:
             if row[0] == "P":
                 row[4] = f"{output_area:.4f}"
-        updated_plot_lines.append(",".join(row) + "\n")
+            updated_plot_lines.append(",".join(row) + "\n")
+
+        # Convert original tree lines
+        original_tree_lines = tree_df.apply(
+            lambda row: f"M,{row['PlotID']},{row['Species']},{int(row['DBH_mm'])},{int(row['Height_m'])}\n", axis=1
+        ).tolist()
+
+        # Assemble full output
+        header = lines[0] + "\n"
+        all_lines = header + "".join(updated_plot_lines + original_tree_lines + simulated_tree_entries)
+
+        # Download button
+        st.download_button(
+            label="📁 Download Adjusted .EPUK File",
+            data=all_lines,
+            file_name="EPUK_Extrapolated_Updated.EPUK",
+            mime="text/plain"
+        )
+
+    except Exception as e:
+        st.error(f"An error occurred while processing the file: {e}")
+else:
+    st.info("Please upload a valid .EPUK file and enter plot sizes.")
